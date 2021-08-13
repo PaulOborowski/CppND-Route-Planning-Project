@@ -37,14 +37,12 @@ float RoutePlanner::CalculateHValue(RouteModel::Node const *node) {
 void RoutePlanner::AddNeighbors(RouteModel::Node *current_node) {
     current_node->FindNeighbors();
     for(RouteModel::Node *neighbor : current_node->neighbors)
-    {
-        if (neighbor->visited==false) {        
-            neighbor->parent = current_node;
-            neighbor->g_value = current_node->g_value+ neighbor->distance(*current_node);
-            neighbor->h_value = this->CalculateHValue(neighbor);
-            this->open_list.push_back(neighbor);
-            neighbor->visited=true;
-         }
+    {      
+        neighbor->parent = current_node;
+        neighbor->g_value = current_node->g_value+ neighbor->distance(*current_node);
+        neighbor->h_value = this->CalculateHValue(neighbor);
+        this->open_list.push_back(neighbor);
+        neighbor->visited=true;         
     }
 }
 
@@ -56,9 +54,7 @@ void RoutePlanner::AddNeighbors(RouteModel::Node *current_node) {
 // - Remove that node from the open_list.
 // - Return the pointer.
 bool Compare(RouteModel::Node *a, RouteModel::Node *b) {
-  float f1 = a->h_value + a->g_value;
-  float f2 = b->h_value + b->g_value;  
-  return f1 > f2; 
+  return (a->h_value + a->g_value) > (b->h_value + b->g_value); 
 }
 
 RouteModel::Node *RoutePlanner::NextNode() {    
@@ -116,7 +112,8 @@ void RoutePlanner::AStarSearch() {
 
     while(this->open_list.size()>0){
         current_node = this->NextNode();        
-        if(current_node == this->end_node){
+        //current_node->distance(end_node)>0
+        if(current_node->distance(*this->end_node) == 0){
             std::cout << "Found end note!" << "\n";
             this->m_Model.path = this->ConstructFinalPath(current_node);
             return;
